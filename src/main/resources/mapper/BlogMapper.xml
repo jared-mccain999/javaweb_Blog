@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.Ryan.mapper.BlogMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BlogResultMap" type="com.Ryan.entity.blog.Blog">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="image" column="image"/>
+        <result property="area" column="area_name"/>
+        <result property="author" column="author_name"/>
+        <result property="likesCount" column="likes_count"/>
+        <result property="favoritesCount" column="favorites_count"/>
+        <result property="viewsCount" column="views_count"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="tags" column="tags"/>
+    </resultMap>
+
+    <!-- 分页查询博客 -->
+    <select id="findByPage" resultMap="BlogResultMap">
+        SELECT
+        b.id,
+        b.title,
+        b.content,
+        b.image,
+        a.name AS area_name,
+        u.username AS author_name,
+        b.likes_count,
+        b.favorites_count,
+        b.views_count,
+        b.created_time,
+        GROUP_CONCAT(DISTINCT t.tag_name) AS tags
+        FROM blog b
+        INNER JOIN user u ON b.author_id = u.id
+        INNER JOIN area a ON b.area_id = a.id
+        LEFT JOIN blog_tag bt ON b.id = bt.blog_id
+        LEFT JOIN tag t ON bt.tag_id = t.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                u.username LIKE CONCAT('%', #{keyword}, '%')
+                OR t.tag_name LIKE CONCAT('%', #{keyword}, '%')
+                OR a.name LIKE CONCAT('%', #{keyword}, '%')
+                OR b.title LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        GROUP BY
+        b.id,
+        b.title,
+        b.content,
+        b.image,
+        a.name,
+        u.username,
+        b.likes_count,
+        b.favorites_count,
+        b.views_count,
+        b.created_time
+        ORDER BY
+        <choose>
+            <when test="sort == 'favorites'">b.favorites_count DESC</when>
+            <when test="sort == 'likes'">b.likes_count DESC</when>
+            <when test="sort == 'views'">b.views_count DESC</when>
+            <otherwise>b.created_time DESC</otherwise>
+        </choose>
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 根据关键词统计数量 -->
+    <select id="countByKeyword" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT b.id)
+        FROM blog b
+        INNER JOIN user u ON b.author_id = u.id
+        INNER JOIN area a ON b.area_id = a.id
+        LEFT JOIN blog_tag bt ON b.id = bt.blog_id
+        LEFT JOIN tag t ON bt.tag_id = t.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                u.username LIKE CONCAT('%', #{keyword}, '%')
+                OR t.tag_name LIKE CONCAT('%', #{keyword}, '%')
+                OR a.name LIKE CONCAT('%', #{keyword}, '%')
+                OR b.title LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+    </select>
+</mapper>
