@@ -4,6 +4,7 @@ import com.Ryan.entity.user.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -53,4 +54,11 @@ public interface UserMapper {
     })
     Integer countByKeyword(@Param("keyword") String keyword);
 
+
+    @Select("select id, username, image, email, role, password, created_time, blog_count, collection_count, status from user where id = #{id}")
+    User findById(Integer id);
+
+    // 更新用户信息
+    @Update("update user set username = #{username}, password = #{password}, role = #{role}, status = #{status} where id = #{id}")
+    int updateById(User user);
 }

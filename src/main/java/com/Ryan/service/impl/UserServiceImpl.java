@@ -3,7 +3,7 @@ package com.Ryan.service.impl;
 import com.Ryan.entity.user.User;
 import com.Ryan.mapper.UserMapper;
 import com.Ryan.service.UserService;
-import com.Ryan.util.page.PageInfo;
+import com.Ryan.dto.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,5 +46,18 @@ public class UserServiceImpl implements UserService {
         pageInfo.setPages((int) Math.ceil((double)total / pageSize));
 
         return pageInfo;
+    }
+
+    @Override
+    public User findById(Integer id) {
+        return userMapper.findById(id);
+    }
+
+    @Override
+    public boolean updateById(User user) {
+        if(userMapper.updateById(user) > 0){
+            return true;
+        }
+        return false;
     }
 }

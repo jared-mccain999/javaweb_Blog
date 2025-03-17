@@ -149,6 +149,7 @@
                         </a>
                     </th>
                     <th width="10%">角色</th>
+                    <th width="10%">状态</th>
                     <th width="17%">操作</th>
                 </tr>
                 </thead>
@@ -171,24 +172,24 @@
                         </td>
                         <td>${user.collectionCount}</td>
                         <td>
-                            <span class="label ${(user.role == 'admin')?then('label-danger','label-success')}">
+                            <span class="label ${(user.role != 'user')?then('label-danger','label-success')}">
                                 ${user.role}
                             </span>
                         </td>
                         <td>
-                            <div class="btn-group">
+                            <span class="label ${(user.status == 0)?then('label-danger','label-success')}">
+                                ${(user.status == 1)?then('正常' , '冻结')}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" id='relatedTarget'>
                                 <a href="/admin/blogs?userId=${user.id}"
                                    class="btn btn-xs btn-info"
                                    title="查看文章">
                                     <i class="icon icon-eye-open"></i>
                                 </a>
-                                <button class="btn btn-xs btn-warning edit-btn"
-                                        data-toggle="modal"
-                                        data-target="#editModal"
-                                        data-userid="${user.id}"
-                                        data-username="${user.username}"
-                                        data-email="${user.email}"
-                                        data-role="${user.role}">
+                                <button onclick="userUpdate('${user.id}', '${user.username}', '${user.role}', '${user.status}', '${user.areaId}')"
+                                        class="btn btn-xs btn-warning edit-btn">
                                     <i class="icon icon-edit"></i>
                                 </button>
                             </div>
@@ -242,7 +243,7 @@
 </div>
 
 <!-- 编辑用户模态框 -->
-<div class="modal fade" id="editModal">
+<div class="modal fade" id="userUpudateModal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -251,49 +252,120 @@
                 </button>
                 <h4 class="modal-title"><i class="icon icon-edit"></i> 修改用户信息</h4>
             </div>
-            <form action="/admin/user/update" method="post">
+            <form action="/admin/users/update" method="post">
                 <div class="modal-body">
-                    <input type="hidden" name="id" id="editUserId">
+                    <input type="hidden" name="currentPage" id="currentPage">
+                    <input type="hidden" name="currentSort" id="currentSort">
+                    <input type="hidden" name="currentKeyword" id="currentKeyword">
+                    <input type="hidden" name="id" id="id">
                     <div class="form-group">
                         <label>用户名</label>
-                        <input type="text" class="form-control"
-                               name="username" id="editUsername" required>
+                        <input type="text" class="form-control" disabled="disabled"
+                               name="username" id="username">
                     </div>
                     <div class="form-group">
-                        <label>电子邮箱</label>
-                        <input type="email" class="form-control"
-                               name="email" id="editEmail" required>
+                        <label>用户密码</label>
+                        <input type="password" class="form-control"
+                               name="password" id="password">
                     </div>
+<#--                    <div class="form-group">-->
+<#--                        <label>电子邮箱</label>-->
+<#--                        <input type="email" class="form-control"-->
+<#--                               name="email" id="editEmail" required>-->
+<#--                    </div>-->
                     <div class="form-group">
                         <label>用户角色</label>
-                        <select class="form-control" name="role" id="editRole">
+                        <select class="form-control" name="role" id="role">
                             <option value="user">普通用户</option>
-                            <option value="admin">管理员</option>
+                            <option value="area_admin">区域管理员</option>
+                            <option value="sys_admin">系统管理员</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>管理领域</label>
+                        <input type="text" class="form-control"
+                               name="area" id="area" >
+                    </div>
+                    <div class="form-group">
+                        <label for="example">用户状态</label>
+                        <label>
+                            <input type="radio" name = "status" value="1" checked="checked">正常
+                        </label>
+                        <label>
+                            <input type="radio" name = "status" value="0" >冻结
+                        </label>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="submit" class="btn btn-primary">保存修改</button>
+                    <button type="submit" class="btn btn-primary" onclick="userUpdateAction()">保存修改</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<#include "../import/bottom.ftl">
 
 <script>
-    // 模态框数据绑定
-    $(function(){
-        $('#editModal').on('show.bs.modal', function(event) {
-            const button = $(event.relatedTarget);
-            const modal = $(this);
+    function userUpdateAction() {
 
-            modal.find('#editUserId').val(button.data('userid'));
-            modal.find('#editUsername').val(button.data('username'));
-            modal.find('#editEmail').val(button.data('email'));
-            modal.find('#editRole').val(button.data('role'));
+        let id = $('#id').val();
+        let username = $('#username').val();
+        let password = $('#password').val();
+        let role = $('#role').val();
+        let areaId = $('#area').val();
+        let status = $('input[name="status"]:checked').val();
+        // 错误操作显示
+        if(!checkNotNull(id)){
+            zuiMsg('程序错误，请刷新');
+            return false;
+        }
+        if(!checkNotNull(username)){
+            zuiMsg('用户名不能为空');
+            return false;
+        }
+        $.post({
+                id: id,
+                username: username,
+                password: password,
+                role: role,
+                areaId: areaId,
+                status: status,
+            success: function (data) {
+                if(data.code == 200){
+                    alert(data.message)
+                    location.reload();
+                    return;
+                }else{
+                    zuiMsg(data.message);
+                }
+            }
         });
-    });
+    }
+
+    function userUpdate(id, username, role, status, areaId) {
+
+        const urlParams = new URLSearchParams(window.location.search);
+        $('#currentPage').val(urlParams.get('page') || 1);
+        $('#currentSort').val(urlParams.get('sort') || 'id');
+        $('#currentKeyword').val(urlParams.get('keyword') || '');
+
+
+        $('#userUpudateModal').modal('toggle','center')
+
+        $('#id').val(id)
+        $('#username').val(username)
+        $('#role').val(role)
+        $('#area').val(areaId)
+        if(status == 1){
+            $('input[name="status"]').eq(0).attr("checked",true);
+        }else{
+            $('input[name="status"]').eq(1).attr("checked",true);
+        }
+
+    }
+
+
 </script>
+
+<#include "../import/bottom.ftl">

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -23,6 +24,6 @@ public class User {
     private Integer status = 1;
     private Integer collectionCount = 0;
     private String role = "user";
-    private Data createdTime;
+    private Date createdTime;
 }
 

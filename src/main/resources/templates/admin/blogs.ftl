@@ -229,7 +229,6 @@
     </div>
 </div>
 
-<#include "../import/bottom.ftl">
 
 <script>
     // 模态框数据绑定
@@ -256,3 +255,5 @@
         });
     });
 </script>
+
+<#include "../import/bottom.ftl">

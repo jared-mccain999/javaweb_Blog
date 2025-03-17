@@ -1,9 +1,7 @@
 package com.Ryan.service;
 
 import com.Ryan.entity.blog.Blog;
-import com.Ryan.service.impl.BlogServiceImpl;
-import com.Ryan.util.page.PageInfo;
-import org.springframework.stereotype.Service;
+import com.Ryan.dto.PageInfo;
 
 
 public interface BlogService{
