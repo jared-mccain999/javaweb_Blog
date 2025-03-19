@@ -42,10 +42,10 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword, Integer userId) {
+    public PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword, Integer userId, Integer areaId) {
         int offset = (page - 1) * pageSize;
-        List<Blog> blogs = blogMapper.findByPage(keyword, sort, offset, pageSize,userId);
-        int total = blogMapper.countByKeyword(keyword,userId);
+        List<Blog> blogs = blogMapper.findByPage(keyword, sort, offset, pageSize,userId,areaId);
+        int total = blogMapper.countByKeyword(keyword,userId,areaId);
         PageInfo<Blog> pageInfo = new PageInfo<>();
         pageInfo.setList(blogs);
         pageInfo.setSort(sort);

@@ -41,6 +41,9 @@ public interface BlogMapper {
             "  <if test='userid != null and userid != \"\"'>",
             "    AND (u.id LIKE CONCAT('%', #{userid}, '%'))",
             "  </if>",
+            "  <if test='areaid != null and areaid != \"\"'>",
+            "    AND (a.id LIKE CONCAT('%', #{areaid}, '%'))",
+            "  </if>",
             "</where>",
             "GROUP BY b.id, b.title, b.content, b.image, a.name, u.username,",
             "  b.likes_count, b.favorites_count, b.views_count, b.created_time",
@@ -72,7 +75,8 @@ public interface BlogMapper {
             @Param("sort") String sort,
             @Param("offset") int offset,
             @Param("pageSize") int pageSize,
-            @Param("userid") Integer userid
+            @Param("userid") Integer userid,
+            @Param("areaid") Integer areaid
     );
 
 
@@ -95,8 +99,11 @@ public interface BlogMapper {
             "  <if test='userid != null and userid != \"\"'>",
             "    AND (u.id LIKE CONCAT('%', #{userid}, '%'))",
             "  </if>",
+            "  <if test='areaid != null and areaid != \"\"'>",
+            "    AND (a.id LIKE CONCAT('%', #{areaid}, '%'))",
+            "  </if>",
             "</where>",
             "</script>"
     })
-    Integer countByKeyword(@Param("keyword") String keyword, @Param("userid") Integer userid);
+    Integer countByKeyword(@Param("keyword") String keyword, @Param("userid") Integer userid, @Param("areaid") Integer areaid);
 }

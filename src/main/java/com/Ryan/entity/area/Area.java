@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Area {
     private Integer id;
-    private String tagName;
+    private String name;
 }
