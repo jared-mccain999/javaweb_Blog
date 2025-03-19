@@ -18,7 +18,7 @@ public class OperationLog {
     private Integer adminId;
     private String action;
     private Integer targetId;//用户id
-    private TargetType targetType;
+    private String targetType;
     private LocalDateTime timestamp = LocalDateTime.now();
 }
 

@@ -11,7 +11,7 @@ public interface BlogMapper {
     @Select("SELECT COUNT(*) FROM blog")
     Integer count();
 
-
+// 添加userid限制
     @Select({
             "<script>",
             "SELECT",
@@ -37,6 +37,9 @@ public interface BlogMapper {
             "      OR t.tag_name LIKE CONCAT('%', #{keyword}, '%')",
             "      OR a.name LIKE CONCAT('%', #{keyword}, '%')",
             "      OR b.title LIKE CONCAT('%', #{keyword}, '%'))",
+            "  </if>",
+            "  <if test='userid != null and userid != \"\"'>",
+            "    AND (u.id LIKE CONCAT('%', #{userid}, '%'))",
             "  </if>",
             "</where>",
             "GROUP BY b.id, b.title, b.content, b.image, a.name, u.username,",
@@ -68,8 +71,11 @@ public interface BlogMapper {
             @Param("keyword") String keyword,
             @Param("sort") String sort,
             @Param("offset") int offset,
-            @Param("pageSize") int pageSize
+            @Param("pageSize") int pageSize,
+            @Param("userid") Integer userid
     );
+
+
 
     @Select({
             "<script>",
@@ -84,11 +90,13 @@ public interface BlogMapper {
             "    (u.username LIKE CONCAT('%', #{keyword}, '%')",
             "      OR t.tag_name LIKE CONCAT('%', #{keyword}, '%')",
             "      OR a.name LIKE CONCAT('%', #{keyword}, '%')",
-            "      OR b.title LIKE CONCAT('%', #{keyword}, '%'))",
+            "      OR b.title LIKE CONCAT('%', #{keyword}, '%')",
+            "  </if>",
+            "  <if test='userid != null and userid != \"\"'>",
+            "    AND (u.id LIKE CONCAT('%', #{userid}, '%'))",
             "  </if>",
             "</where>",
             "</script>"
     })
-    Integer countByKeyword(@Param("keyword") String keyword);
-
+    Integer countByKeyword(@Param("keyword") String keyword, @Param("userid") Integer userid);
 }

@@ -7,5 +7,6 @@ import com.Ryan.dto.PageInfo;
 public interface BlogService{
     Object count();
 
-    public PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword);
+    public PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword, Integer userId);
+
 }

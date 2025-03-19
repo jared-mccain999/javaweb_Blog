@@ -42,11 +42,10 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword) {
+    public PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword, Integer userId) {
         int offset = (page - 1) * pageSize;
-        List<Blog> blogs = blogMapper.findByPage(keyword, sort, offset, pageSize);
-        System.out.println("Service" + blogs.toString());
-        int total = blogMapper.countByKeyword(keyword);
+        List<Blog> blogs = blogMapper.findByPage(keyword, sort, offset, pageSize,userId);
+        int total = blogMapper.countByKeyword(keyword,userId);
         PageInfo<Blog> pageInfo = new PageInfo<>();
         pageInfo.setList(blogs);
         pageInfo.setSort(sort);
@@ -56,4 +55,6 @@ public class BlogServiceImpl implements BlogService {
         pageInfo.setPages((int) Math.ceil((double)total / pageSize));
         return pageInfo;
     }
+
+
 }

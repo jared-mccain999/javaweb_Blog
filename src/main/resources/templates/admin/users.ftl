@@ -298,7 +298,11 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="submit" class="btn btn-primary" onclick="userUpdateAction()">保存修改</button>
+<#--                    <button type="submit" class="btn btn-primary" onclick="userUpdateAction()">保存修改</button>-->
+                    <form onsubmit="return userUpdateAction(event)">
+                        <!-- 表单内容 -->
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                    </form>
                 </div>
             </form>
         </div>
@@ -324,7 +328,7 @@
             zuiMsg('用户名不能为空');
             return false;
         }
-        $.post({
+        $.post("/admin/users/update",{
                 id: id,
                 username: username,
                 password: password,
@@ -334,8 +338,8 @@
             success: function (data) {
                 if(data.code == 200){
                     alert(data.message)
-                    location.reload();
-                    return;
+                    location.reload("users.ftl");
+                    return ;
                 }else{
                     zuiMsg(data.message);
                 }
@@ -345,10 +349,10 @@
 
     function userUpdate(id, username, role, status, areaId) {
 
-        const urlParams = new URLSearchParams(window.location.search);
-        $('#currentPage').val(urlParams.get('page') || 1);
-        $('#currentSort').val(urlParams.get('sort') || 'id');
-        $('#currentKeyword').val(urlParams.get('keyword') || '');
+        // const urlParams = new URLSearchParams(window.location.search);
+        // $('#currentPage').val(urlParams.get('page') || 1);
+        // $('#currentSort').val(urlParams.get('sort') || 'id');
+        // $('#currentKeyword').val(urlParams.get('keyword') || '');
 
 
         $('#userUpudateModal').modal('toggle','center')
