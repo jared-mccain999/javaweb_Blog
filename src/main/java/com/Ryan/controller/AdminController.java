@@ -7,6 +7,7 @@ import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 
 import com.Ryan.dto.UserDto;
+import com.Ryan.entity.announcement.Announcement;
 import com.Ryan.entity.area.Area;
 import com.Ryan.entity.blog.Blog;
 import com.Ryan.entity.log.OperationLog;
@@ -46,9 +47,11 @@ public class AdminController {
     private BlogTagService blogTagService;
     @Autowired
     private OperationLogService operationLogService;
+    @Autowired
+    private AnnouncementService announcementService;
 
 
-    // 管理者首页
+    // 管理者首页,展示基本信息
     @GetMapping("/index")
     public String adminIndex(Model model) {
         //系统信息
@@ -79,7 +82,7 @@ public class AdminController {
     }
 
 
-    //事件绑定
+    //用户信息修改
     @Transactional
     @PostMapping("/users/update")
     @ResponseBody
@@ -113,6 +116,7 @@ public class AdminController {
     }
 
 
+    //管理文章页面
     @GetMapping("/blogs")
     public String blogs(
             @RequestParam(defaultValue = "1") Integer page,
@@ -124,7 +128,7 @@ public class AdminController {
             Model model) {
         // 检查用户id是否为空,不为空，按用户id查询
 
-        PageInfo<Blog> pageInfo = blogService.findByPage(page, pageSize, sort, keyword, userId,areaId);
+        PageInfo<Blog> pageInfo = blogService.findByPage(page, pageSize, sort, keyword, userId, areaId);
         model.addAttribute("pageInfo", pageInfo);
 
         return "/admin/blogs";
@@ -138,8 +142,8 @@ public class AdminController {
         return "/admin/areas";
     }
 
-    // ====================== AdminController.java ======================
-// 区域删除（修正重定向并添加日志）
+
+    // 区域删除（修正重定向并添加日志）
     @Transactional
     @GetMapping("/areas/delete")
     public String deleteArea(@RequestParam Integer id, RedirectAttributes attributes) {
@@ -219,4 +223,17 @@ public class AdminController {
             return "redirect:/admin/areas";
         }
     }
+
+    // 管理页面，公告管理
+    @GetMapping("/announcements")
+    public String announcements(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(defaultValue = "") String keyword,
+            Model model){
+        PageInfo<Announcement> pageInfo = announcementService.findByPage(page, pageSize, keyword);
+        model.addAttribute("pageInfo", pageInfo);
+        return "/admin/announcements";
+    }
 }
+

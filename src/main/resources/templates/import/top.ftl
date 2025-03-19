@@ -49,7 +49,7 @@
                         </a>
                     <li class="{% if request.path == '/admin/Announcement' %}active{% endif %}">
                     <li>
-                        <a href="/admin/Announcement">
+                        <a href="/admin/announcements">
                             <i class="icon icon-bullhorn"></i> 公告管理
                         </a>
                     </li>
