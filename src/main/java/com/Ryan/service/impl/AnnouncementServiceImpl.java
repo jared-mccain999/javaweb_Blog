@@ -34,4 +34,28 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
         return pageInfo;
     }
+
+    @Override
+    public boolean updateAnnouncement(Announcement announcement) {
+        if (announcementMapper.updateAnnouncementById(announcement) > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteAnnouncement(Integer id) {
+        if (announcementMapper.deleteAnnouncementById(id) > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean createAnnouncement(Announcement announcement) {
+        if (announcementMapper.createAnnouncement(announcement) > 0) {
+            return true;
+        }
+        return false;
+    }
 }

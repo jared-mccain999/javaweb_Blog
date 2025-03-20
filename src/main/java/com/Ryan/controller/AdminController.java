@@ -230,10 +230,92 @@ public class AdminController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "") String keyword,
-            Model model){
+            Model model) {
         PageInfo<Announcement> pageInfo = announcementService.findByPage(page, pageSize, keyword);
         model.addAttribute("pageInfo", pageInfo);
         return "/admin/announcements";
     }
+
+    // 修改公告信息，前端传入id等信息
+    @PostMapping("/announcements/update")
+    public String updateAnnouncement(
+            @ModelAttribute Announcement announcement,
+            RedirectAttributes attributes
+    ) {
+        try {
+            if (announcementService.updateAnnouncement(announcement)) {
+                attributes.addFlashAttribute("success", "公告修改成功");
+                // 添加操作日志
+                OperationLog operationLog = new OperationLog(
+                        null,
+                        0,
+                        "更新公告",
+                        announcement.getId(),
+                        "announcement",
+                        LocalDateTime.now()
+                );
+                operationLogService.InsertOperationLog(operationLog);
+                return "redirect:/admin/announcements";
+            } else {
+                attributes.addFlashAttribute("error", "公告修改失败");
+                return "redirect:/admin/announcements";
+            }
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "公告修改失败：" + e.getMessage());
+            return "redirect:/admin/announcements";
+        }
+
+    }
+
+    // 删除公告
+    @GetMapping("/announcements/delete")
+    public String deleteAnnouncement(@RequestParam Integer id, RedirectAttributes attributes) {
+        try {
+            if (announcementService.deleteAnnouncement(id)) {
+                attributes.addFlashAttribute("success", "公告删除成功");
+                // 添加操作日志
+                OperationLog operationLog = new OperationLog(
+                        null,
+                        0,
+                        "删除公告",
+                        id,
+                        "announcement",
+                        LocalDateTime.now()
+                );
+                operationLogService.InsertOperationLog(operationLog);
+                return "redirect:/admin/announcements";
+            } else {
+                attributes.addFlashAttribute("error", "公告删除失败");
+                return "redirect:/admin/announcements";
+            }
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "公告删除失败：" + e.getMessage());
+            return "redirect:/admin/announcements";
+        }
+    }
+
+    @PostMapping("/announcements/create")
+    public String createAnnouncement(@ModelAttribute Announcement announcement, RedirectAttributes attributes) {
+        try {
+            if (announcementService.createAnnouncement(announcement)) {
+                attributes.addFlashAttribute("success", "公告创建成功");
+                // 添加操作日志
+                OperationLog operationLog = new OperationLog(
+                        null,
+                        0,
+                        "创建公告",
+                        announcement.getId(),
+                        "announcement",
+                        LocalDateTime.now()
+                );
+            }
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "公告创建失败：" + e.getMessage());
+        }
+        return "redirect:/admin/announcements";
+    }
+
 }
+
+
 

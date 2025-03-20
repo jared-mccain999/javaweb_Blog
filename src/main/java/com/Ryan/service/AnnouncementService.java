@@ -7,4 +7,10 @@ import org.springframework.stereotype.Service;
 
 public interface AnnouncementService {
     PageInfo<Announcement> findByPage(Integer page, Integer pageSize, String keyword);
+
+    boolean updateAnnouncement(Announcement announcement);
+
+    boolean deleteAnnouncement(Integer id);
+
+    boolean createAnnouncement(Announcement announcement);
 }

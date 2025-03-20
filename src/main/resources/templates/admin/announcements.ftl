@@ -37,50 +37,53 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                         <thead>
-                            <tr>
-                                <th width="10%">ID</th>
-                                <th width="20%">标题</th>
-                                <th width="30%">内容摘要</th>
-                                <th width="15%">发布日期</th>
-                                <th width="15%">结束日期</th>
-                                <th width="10%">操作</th>
-                            </tr>
+                        <tr>
+                            <th width="10%">公告图片</th>
+                            <th width="20%">标题</th>
+                            <th width="30%">内容摘要</th>
+                            <th width="15%">发布日期</th>
+                            <th width="15%">结束日期</th>
+                            <th width="10%">操作</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <#list pageInfo.list as announcement>
-                                <tr>
-                                    <td>${announcement.id}</td>
-                                    <td>${announcement.title}</td>
-                                    <td>
-                                        <#if announcement.content??>
-                                            ${announcement.content?substring(0, [20, announcement.content?length]?min)}
-                                            <#if (announcement.content?length > 20)>...</#if>
-                                        <#else>
-                                            （无内容）
-                                        </#if>
-                                    </td>
-                                    <td>${(announcement.publishTime?string('yyyy-MM-dd HH:mm:ss'))!}</td>
-                                    <td>${(announcement.cancelTime?string('yyyy-MM-dd HH:mm:ss'))!}</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-xs btn-warning edit-btn"
-                                                    onclick="openEditModal(
+                        <#list pageInfo.list as announcement>
+                            <tr>
+                                <td><img src="${announcement.image!}" class="img-thumbnail"
+                                         style="width:40px;height:40px"></td>
+                                <td>${announcement.title}</td>
+                                <td>
+                                    <#if announcement.content??>
+                                        ${announcement.content?substring(0, [20, announcement.content?length]?min)}
+                                        <#if (announcement.content?length > 20)>...</#if>
+                                    <#else>
+                                        （无内容）
+                                    </#if>
+                                </td>
+                                <td>${(announcement.publishTime?string('yyyy-MM-dd HH:mm'))!}</td>
+                                <td>${(announcement.cancelTime?string('yyyy-MM-dd HH:mm'))!}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-xs btn-warning edit-btn"
+                                                onclick="openEditModal(
                                                         '${announcement.id}',
                                                         '${announcement.title?js_string}',
-                                                        '${announcement.content?js_string}'
-                                                    )"
-                                                    title="编辑">
-                                                <i class="icon icon-edit"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger delete-btn"
-                                                    data-id="${announcement.id}"
-                                                    title="删除">
-                                                <i class="icon icon-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </#list>
+                                                        '${announcement.content?js_string}',
+                                                        '${(announcement.publishTime?string('yyyy-MM-dd HH:mm:ss'))!}',
+                                                        '${(announcement.cancelTime?string('yyyy-MM-dd HH:mm:ss'))!}'
+                                                        )"
+                                                title="编辑">
+                                            <i class="icon icon-edit"></i>
+                                        </button>
+                                        <button class="btn btn-xs btn-danger delete-btn"
+                                                data-id="${announcement.id}"
+                                                title="删除">
+                                            <i class="icon icon-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </#list>
                         </tbody>
                     </table>
                 </div>
@@ -120,6 +123,16 @@
                                   name="content" id="createContent" required
                                   placeholder="请输入公告内容（至少10个字符）"></textarea>
                     </div>
+                    <div class="form-group">
+                        <label>发布时间</label>
+                        <input type="datetime-local" class="form-control"
+                               name="publishTime" id="createPublishTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>撤销时间</label>
+                        <input type="datetime-local" class="form-control"
+                               name="cancelTime" id="createCancelTime" required>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -153,6 +166,16 @@
                         <textarea class="form-control" rows="5"
                                   name="content" id="editContent" required></textarea>
                     </div>
+                    <div class="form-group">
+                        <label>发布时间</label>
+                        <input type="datetime-local" class="form-control"
+                               name="publishTime" id="editPublishTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>撤销时间</label>
+                        <input type="datetime-local" class="form-control"
+                               name="cancelTime" id="editCancelTime" required>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
@@ -165,10 +188,21 @@
 
 <script>
     // 打开编辑模态框
-    function openEditModal(id, title, content) {
+    function openEditModal(id, title, content, publishTime, cancelTime) {
         document.getElementById('editId').value = id;
         document.getElementById('editTitle').value = title;
         document.getElementById('editContent').value = content;
+
+        // 转换时间格式为datetime-local需要的格式（YYYY-MM-DDTHH:mm）
+        const formatDateTime = (isoString) => {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return date.toISOString().slice(0, 16);
+        };
+
+        document.getElementById('editPublishTime').value = formatDateTime(publishTime);
+        document.getElementById('editCancelTime').value = formatDateTime(cancelTime);
+
         $('#editModal').modal('show');
     }
 
@@ -222,7 +256,7 @@
 
     /* 面板样式 */
     .panel {
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         border-radius: 3px;
     }
 
@@ -267,6 +301,15 @@
     textarea {
         resize: vertical;
         min-height: 120px;
+    }
+
+    /* 居中*/
+    input[type="datetime-local"] {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+
     }
 </style>
 

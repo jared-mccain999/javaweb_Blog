@@ -91,7 +91,7 @@ public interface BlogMapper {
             "  LEFT JOIN tag t ON bt.tag_id = t.id",
             "<where>",
             "  <if test='keyword != null and keyword != \"\"'>",
-            "    (u.username LIKE CONCAT('%', #{keyword}, '%')",
+            "    (u.username LIKE CONCAT('%', #{keyword}, '%'))",
             "      OR t.tag_name LIKE CONCAT('%', #{keyword}, '%')",
             "      OR a.name LIKE CONCAT('%', #{keyword}, '%')",
             "      OR b.title LIKE CONCAT('%', #{keyword}, '%')",
