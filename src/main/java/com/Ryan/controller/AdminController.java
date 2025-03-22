@@ -18,7 +18,9 @@ import com.Ryan.service.*;
 import com.Ryan.dto.PageInfo;
 import com.Ryan.util.PasswordUtils;
 import com.Ryan.vo.AreaVo;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,14 +72,22 @@ public class AdminController {
 
     @PostMapping("/login/post")
     @ResponseBody
-    public Result<Logininfo> login(@RequestBody @Valid User user) {
-        return userService.loginSysAdmin(user);
+    public Result<Logininfo> login(@RequestBody @Valid User user, HttpServletResponse response) {
+        Result<Logininfo> result = userService.loginSysAdmin(user);
+        if (result.getCode() == 200) {
+            // 设置HttpOnly Cookie
+            Cookie cookie = new Cookie("Admin-Token", result.getData().getToken());
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setMaxAge(12 * 3600); // 12小时
+            response.addCookie(cookie);
+        }
+        return result;
     }
 
 
     @PostMapping("/logout")
     public String logout(HttpServletRequest request) {
-
         return "redirect:/admin/login";
     }
 

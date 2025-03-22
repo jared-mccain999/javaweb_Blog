@@ -50,7 +50,7 @@
                         <ul class="dropdown-menu" role="menu">
                             <li><a href="#"><i class="icon icon-cog"></i> 个人设置</a></li>
                             <li class="divider"></li>
-                            <li><a href="/admin/logout"><i class="icon icon-power-off"></i> 退出登录</a></li>
+                            <li><a href="/admin/login"><i class="icon icon-power-off"></i> 退出登录</a></li>
                         </ul>
                     </li>
                 </ul>

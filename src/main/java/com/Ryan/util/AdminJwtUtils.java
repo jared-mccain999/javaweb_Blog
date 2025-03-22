@@ -11,7 +11,7 @@ import java.util.Map;
 public class AdminJwtUtils {
 
     // 安全密钥
-    private static final String SECRET_KEY = "Ryan==Admin";
+    private static final String SECRET_KEY = "Ryan,Admin==";
     // 令牌有效期（12小时）
     private static final long EXPIRATION_TIME = 12 * 3600 * 1000;
 

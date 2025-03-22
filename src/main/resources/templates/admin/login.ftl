@@ -16,14 +16,25 @@
             padding: 40px;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
             animation: fadeIn 0.6s;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .password-wrapper { position: relative; }
+
+        .password-wrapper {
+            position: relative;
+        }
+
         .password-toggle {
             position: absolute;
             right: 10px;
@@ -81,14 +92,58 @@
         </form>
     </div>
 </div>
-
 <script>
+    // 页面加载时检查Token
+    // $(document).ready(function() {
+    //     const token = localStorage.getItem('token');
+    //     if (token) {
+    //         window.location.href = '/admin/index';
+    //     }
+    // });
+
+    // 增强表单验证函数
+    function validateForm() {
+        let isValid = true;
+        const username = $('#username').val().trim();
+        const password = $('#password').val().trim();
+
+        // 清除旧错误状态
+        $('.form-control').removeClass('is-invalid');
+        $('.invalid-feedback').hide();
+
+        if (!username) {
+            $('#username').addClass('is-invalid');
+            $('#username-error').text('用户名不能为空').show();
+            isValid = false;
+        }
+
+        if (!password) {
+            $('#password').addClass('is-invalid');
+            $('#password-error').text('密码不能为空').show();
+            isValid = false;
+        } else if (password.length < 4 || password.length > 40) {
+            $('#password').addClass('is-invalid');
+            $('#password-error').text('密码长度需在4-40位之间').show();
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     // 表单提交处理
-    $('#loginForm').submit(function(e) {
+    $('#loginForm').submit(function (e) {
         e.preventDefault();
+        const $btn = $(this).find('button[type="submit"]');
+        $btn.prop('disabled', true).html('<i class="icon icon-spin icon-spinner"></i> 登录中...');
+
+        if (!validateForm()) {
+            $btn.prop('disabled', false).html('登 录');
+            return;
+        }
+
         const formData = {
-            username: $('#username').val(),
-            password: $('#password').val()
+            username: $('#username').val().trim(),
+            password: $('#password').val().trim()
         };
 
         $.ajax({
@@ -96,27 +151,88 @@
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
-            success: function(response) {
+            success: function (response) {
+                console.log('Full Response:', response); // 查看完整响应结构
+                console.log('Token:', response.data.token); // 确认token存在
+                localStorage.setItem('token', response.data.token);
                 if (response.code === 200) {
-                    window.location.href = '/admin/index'; // 登录成功后跳转
+                    // 保存Token到localStorage
+                    localStorage.setItem('token', response.data.token);
+
+                    // 设置全局AJAX头
+                    $.ajaxSetup({
+                        headers: {
+                            'Authorization': 'Bearer ' + response.data.token
+                        }
+                    });
+
+                    window.location.href = '/admin/index';
                 } else {
-                    showMessage(response.msg || '登录失败', 'danger');
+                    handleError(response);
                 }
             },
             error: function(xhr) {
-                const msg = xhr.responseJSON?.msg || '服务器错误';
-                showMessage(msg, 'danger');
+                handleNetworkError(xhr);
+            },
+            complete: function() {
+                $btn.prop('disabled', false).html('登 录');
             }
         });
     });
 
+    // 错误处理函数
+    function handleError(response) {
+        let errorMsg = response.msg || '登录失败';
+        const fields = {
+            400: { field: 'username', msg: '请求参数错误' },
+            401: { field: 'password', msg: '密码错误' },
+            404: { field: 'username', msg: '用户不存在' }
+        };
 
+        if (fields[response.code]) {
+            const { field, msg } = fields[response.code];
+            $('#' + field).addClass('is-invalid');
+            $('#' + field + '-error').text(msg).show();
+            errorMsg = msg;
+        }
+
+        showMessage(errorMsg, 'danger');
+    }
+
+    // 网络错误处理
+    function handleNetworkError(xhr) {
+        const errorMsg = xhr.status === 0
+            ? '无法连接服务器，请检查网络'
+            : (xhr.status >= 500 ? '服务器内部错误' : '未知网络错误');
+        showMessage(errorMsg, 'danger');
+    }
+
+    // 显示消息
     function showMessage(msg, type) {
         new $.zui.Messager(msg, {
             type: type,
-            placement: 'top'
+            placement: 'top',
+            time: 3000
         }).show();
     }
+
+    // 密码可见切换
+    function togglePassword() {
+        const $password = $('#password');
+        const $toggle = $('.password-toggle i');
+        const isPassword = $password.attr('type') === 'password';
+
+        $password.attr('type', isPassword ? 'text' : 'password');
+        $toggle.toggleClass('icon-eye-open icon-eye-close');
+    }
+
+    // 全局处理401未授权
+    $(document).ajaxComplete(function(event, xhr) {
+        if (xhr.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/admin/login';
+        }
+    });
 </script>
 </body>
 </html>
