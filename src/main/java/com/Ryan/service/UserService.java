@@ -1,5 +1,7 @@
 package com.Ryan.service;
 
+import com.Ryan.entity.logininfo.Logininfo;
+import com.Ryan.entity.result.Result;
 import com.Ryan.entity.user.User;
 import com.Ryan.dto.PageInfo;
 
@@ -16,4 +18,6 @@ public interface UserService {
     User findById(Integer id);
 
     boolean updateById(User user);
+
+    Result<Logininfo> loginSysAdmin(User user);
 }

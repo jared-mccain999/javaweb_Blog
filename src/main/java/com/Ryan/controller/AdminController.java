@@ -11,11 +11,14 @@ import com.Ryan.entity.announcement.Announcement;
 import com.Ryan.entity.area.Area;
 import com.Ryan.entity.blog.Blog;
 import com.Ryan.entity.log.OperationLog;
+import com.Ryan.entity.logininfo.Logininfo;
 import com.Ryan.entity.result.Result;
 import com.Ryan.entity.user.User;
 import com.Ryan.service.*;
 import com.Ryan.dto.PageInfo;
+import com.Ryan.util.PasswordUtils;
 import com.Ryan.vo.AreaVo;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.HttpServletBean;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -50,6 +54,32 @@ public class AdminController {
     @Autowired
     private AnnouncementService announcementService;
 
+
+    /*
+     * 管理员登入
+     */
+
+
+    @GetMapping("/login")
+    public String loginPage(HttpServletRequest request, Model model) {
+        // 判断是否为AJAX请求
+        boolean isXhr = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        model.addAttribute("xhr", isXhr);
+        return "admin/login";
+    }
+
+    @PostMapping("/login/post")
+    @ResponseBody
+    public Result<Logininfo> login(@RequestBody @Valid User user) {
+        return userService.loginSysAdmin(user);
+    }
+
+
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request) {
+
+        return "redirect:/admin/login";
+    }
 
     // 管理者首页,展示基本信息
     @GetMapping("/index")
@@ -87,21 +117,19 @@ public class AdminController {
     @PostMapping("/users/update")
     @ResponseBody
     public Result updateUse(@Valid UserDto userdto) {
-
-        // 查询用户信息
+        // 查找用户id
         User user = userService.findById(userdto.getId());
-        // 判断用户是否找到
         if (Objects.isNull(user)) {
             return Result.error("用户不存在");
         }
+
         userdto.setUsername(user.getUsername());
         BeanUtils.copyProperties(userdto, user);
-        // 密码加密
-        Date userCreatedTime = user.getCreatedTime();
+
         String password = userdto.getPassword();
         if (StrUtil.isNotBlank(password)) {
-            // 用户密码加密，注册时间+密码，md5加密
-            user.setPassword(SecureUtil.md5(userCreatedTime + password));
+            // 使用工具类加密
+            user.setPassword(PasswordUtils.encrypt(user.getCreatedTime(), password));
         }
         if (userService.updateById(user)) {
             // 添加日志

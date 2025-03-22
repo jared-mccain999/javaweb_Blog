@@ -61,4 +61,7 @@ public interface UserMapper {
     // 更新用户信息
     @Update("update user set username = #{username}, password = #{password}, role = #{role}, status = #{status} where id = #{id}")
     int updateById(User user);
+
+    @Select("select id, username, image, email, role, password, created_time, blog_count, collection_count, status from user where username = #{username}")
+    User findByUsername(String user);
 }
