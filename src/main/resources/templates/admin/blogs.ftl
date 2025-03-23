@@ -33,21 +33,23 @@
                         </span>
                     </div>
                     <input type="hidden" name="page" value="1">
+                    <input type="hidden" name="sort" value="${pageInfo.sort!}">
+                    <input type="hidden" name="pageSize" value="${pageInfo.pageSize!15}">
                 </form>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                         <thead>
                         <tr>
-                            <th width="5%"><a href="?sort=id&keyword=${pageInfo.keyword!}">ID ${((pageInfo.sort!"id") == "id")?then('▼','')}</a></th>
+                            <th width="5%"><a href="?sort=id&keyword=${pageInfo.keyword!}&pageSize=${pageInfo.pageSize!15}">ID ${((pageInfo.sort!"id") == "id")?then('▼','')}</a></th>
                             <th width="20%">标题</th>
                             <th width="10%">封面</th>
                             <th width="8%">区域</th>
                             <th width="10%">状态</th>
                             <th width="12%">作者</th>
-                            <th width="8%"><a href="?sort=likes_count&keyword=${pageInfo.keyword!}">点赞 ${((pageInfo.sort!"id") == "likes_count")?then('▼','')}</a></th>
-                            <th width="8%"><a href="?sort=favorites_count&keyword=${pageInfo.keyword!}">收藏 ${((pageInfo.sort!"id") == 'favorites_count')?then('▼','')}</a></th>
-                            <th width="8%"><a href="?sort=views_count&keyword=${pageInfo.keyword!}">浏览 ${((pageInfo.sort!"id") == 'views_count')?then('▼','')}</a></th>
+                            <th width="8%"><a href="?sort=likes_count&keyword=${pageInfo.keyword!}&pageSize=${pageInfo.pageSize!15}">点赞 ${((pageInfo.sort!"id") == "likes_count")?then('▼','')}</a></th>
+                            <th width="8%"><a href="?sort=favorites_count&keyword=${pageInfo.keyword!}&pageSize=${pageInfo.pageSize!15}">收藏 ${((pageInfo.sort!"id") == 'favorites_count')?then('▼','')}</a></th>
+                            <th width="8%"><a href="?sort=views_count&keyword=${pageInfo.keyword!}&pageSize=${pageInfo.pageSize!15}">浏览 ${((pageInfo.sort!"id") == 'views_count')?then('▼','')}</a></th>
                             <th width="12%">创建时间</th>
                             <th width="12%">操作</th>
                         </tr>
@@ -60,11 +62,15 @@
                                 <td><img src="${blog.image!}" class="img-thumbnail" style="width:60px;height:40px"></td>
                                 <td>${blog.area!'-'}</td>
                                 <td>
-                                        <span class="label ${(blog.status == 'PENDING')?then('label-warning',
-                                        (blog.status == 'APPROVED')?then('label-success',
-                                        'label-default'))}">
-                                            ${blog.status}
-                                        </span>
+                                    <span class="label ${(blog.status == 'pending')?then('label-warning',
+                                    (blog.status == 'approved')?then('label-success',
+                                    'label-default'))}">
+                                        <#switch blog.status>
+                                            <#case "pending">待审核<#break>
+                                            <#case "approved">已发布<#break>
+                                            <#case "rejected">已拒绝<#break>
+                                        </#switch>
+                                    </span>
                                 </td>
                                 <td>${blog.author}</td>
                                 <td>${blog.likesCount}</td>
@@ -83,9 +89,8 @@
                                                 data-title="${blog.title}"
                                                 data-content="${blog.content}"
                                                 data-image="${blog.image!}"
-                                                data-area="${blog.area}"
-                                                data-status="${blog.status}"
-                                                data-tags="${blog.tags!}">
+                                                data-areaid="${blog.areaId!}"
+                                                data-status="${blog.status}">
                                             <i class="icon icon-edit"></i>
                                         </button>
                                         <button class="btn btn-xs btn-danger delete-btn"
@@ -149,44 +154,24 @@
                 </button>
                 <h4 class="modal-title"><i class="icon icon-edit"></i> 编辑博客</h4>
             </div>
-            <form action="/admin/blog/update" method="post">
+            <form action="/admin/blogs/update" method="post">
                 <div class="modal-body">
                     <input type="hidden" name="id" id="editBlogId">
-
-                    <div class="form-group">
-                        <label>标题</label>
-                        <input type="text" class="form-control"
-                               name="title" id="editTitle" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>内容</label>
-                        <textarea class="form-control"
-                                  name="content" id="editContent"
-                                  rows="5" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>封面图URL</label>
-                        <input type="text" class="form-control"
-                               name="image" id="editImage">
-                    </div>
-
                     <div class="form-group">
                         <label>区域</label>
                         <select class="form-control" name="areaId" id="editArea">
-                            <!-- 需要从后端获取区域列表动态生成 -->
-                            <option value="1">北京</option>
-                            <option value="2">上海</option>
+                            <#list areas as area>
+                                <option value="${area.id}">${area.name}</option>
+                            </#list>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>状态</label>
                         <select class="form-control" name="status" id="editStatus">
-                            <option value="PENDING">待审核</option>
-                            <option value="APPROVED">已发布</option>
-                            <option value="REJECTED">已拒绝</option>
+                            <option value="pending">待审核</option>
+                            <option value="approved">已发布</option>
+                            <option value="rejected">已拒绝</option>
                         </select>
                     </div>
 
@@ -212,11 +197,11 @@
             const button = $(event.relatedTarget);
             const modal = $(this);
 
-            modal.find('#editBlogId').val(button.data('blogid'));
+            modal.find('#editBlogId').val(button.data('id'));
             modal.find('#editTitle').val(button.data('title'));
             modal.find('#editContent').val(button.data('content'));
             modal.find('#editImage').val(button.data('image'));
-            modal.find('#editArea').val(button.data('area'));
+            modal.find('#editArea').val(button.data('areaid')); // 使用区域ID
             modal.find('#editStatus').val(button.data('status'));
             modal.find('#editTags').val(button.data('tags'));
         });
@@ -232,34 +217,28 @@
 </script>
 
 <style>
-    /* 统一主要容器样式 */
     .main-container {
         min-height: calc(100vh - 120px);
         background: #f5f5f5;
     }
-
-    /* 面板样式优化 */
     .panel {
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         border-radius: 3px;
     }
-
-    /* 操作按钮组间距 */
     .btn-group {
         display: flex;
         gap: 5px;
     }
-
-    /* 表格头部样式统一 */
     .table > thead > tr > th {
         background: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
     }
-
-    /* 分页样式微调 */
     .pagination-sm {
         margin: 15px 0 0;
     }
+    .label-warning { background-color: #f0ad4e; }
+    .label-success { background-color: #5cb85c; }
+    .label-default { background-color: #777; }
 </style>
 
 <#include "../import/bottom.ftl">

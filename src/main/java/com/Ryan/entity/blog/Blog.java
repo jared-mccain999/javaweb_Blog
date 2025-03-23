@@ -17,7 +17,7 @@ public class Blog {
     private String content;
     private String image;
     private Integer areaId;
-    private Status status = Status.PENDING;
+    private Status status = Status.pending;
     private Integer authorId;
     private Integer likesCount = 0;
     private Integer favoritesCount = 0;

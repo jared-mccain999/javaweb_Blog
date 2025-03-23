@@ -6,6 +6,7 @@ import cn.hutool.system.HostInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 
+import com.Ryan.dto.BlogDto;
 import com.Ryan.dto.UserDto;
 import com.Ryan.entity.announcement.Announcement;
 import com.Ryan.entity.area.Area;
@@ -22,6 +23,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -85,11 +87,12 @@ public class AdminController {
         return result;
     }
 
-
+    // 退出
     @PostMapping("/logout")
     public String logout(HttpServletRequest request) {
         return "redirect:/admin/login";
     }
+
 
     // 管理者首页,展示基本信息
     @GetMapping("/index")
@@ -164,12 +167,29 @@ public class AdminController {
             @RequestParam(defaultValue = "") Integer userId,
             @RequestParam(defaultValue = "") Integer areaId,
             Model model) {
-        // 检查用户id是否为空,不为空，按用户id查询
-
+        // 获取所有区域
+        List<AreaVo> areasList = areaService.areasList();
         PageInfo<Blog> pageInfo = blogService.findByPage(page, pageSize, sort, keyword, userId, areaId);
         model.addAttribute("pageInfo", pageInfo);
+        model.addAttribute("areas", areasList);
 
         return "/admin/blogs";
+    }
+
+    // 修改博客
+    @PostMapping("/blogs/update")
+    public String updateBlog(@Valid BlogDto blogdto) {
+        // 根据id修改其的发布状态以及区域，调用Service层
+        if (blogService.updateBlog(blogdto)) {
+            // 添加日志
+            OperationLog operationLog = new OperationLog(null, 0, "修改博客信息", blogdto.getId(), "blog", LocalDateTime.now());
+            int i = operationLogService.InsertOperationLog(operationLog);
+            if (i > 0) {
+                return "redirect:/admin/blogs";
+            }
+            return "操作日志更新失败";
+        }
+        return "修改失败";
     }
 
     // 领域管理
@@ -183,7 +203,7 @@ public class AdminController {
 
     // 区域删除（修正重定向并添加日志）
     @Transactional
-    @GetMapping("/areas/delete")
+    @DeleteMapping("/areas/delete")
     public String deleteArea(@RequestParam Integer id, RedirectAttributes attributes) {
         try {
             String name = areaService.getNameById(id);
