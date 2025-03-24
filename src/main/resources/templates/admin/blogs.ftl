@@ -85,12 +85,13 @@
                                         <button class="btn btn-xs btn-warning edit-btn"
                                                 data-toggle="modal"
                                                 data-target="#editModal"
-                                                data-blogid="${blog.id}"
-                                                data-title="${blog.title}"
-                                                data-content="${blog.content}"
-                                                data-image="${blog.image!}"
-                                                data-areaid="${blog.areaId!}"
-                                                data-status="${blog.status}">
+                                                onclick="UpdateBlog(
+                                                        '${blog.id}',
+                                                        '${blog.title}',
+                                                        '${blog.status}',
+                                                        '${blog.areaId}',
+                                                        '${blog.area}'
+                                                        )">
                                             <i class="icon icon-edit"></i>
                                         </button>
                                         <button class="btn btn-xs btn-danger delete-btn"
@@ -192,7 +193,7 @@
 
 <script>
     // 模态框数据绑定
-    $(function(){
+    $(function(id,title,status,areaId,area){
         $('#editModal').on('show.bs.modal', function(event) {
             const button = $(event.relatedTarget);
             const modal = $(this);
@@ -214,7 +215,68 @@
             }
         });
     });
+
+
+    function userUpdateAction() {
+
+        let id = $('#id').val();
+        let username = $('#username').val();
+        let password = $('#password').val();
+        let role = $('#role').val();
+        let areaId = $('#area').val();
+        let status = $('input[name="status"]:checked').val();
+        // 错误操作显示
+        if(!checkNotNull(id)){
+            zuiMsg('程序错误，请刷新');
+            return false;
+        }
+        if(!checkNotNull(username)){
+            zuiMsg('用户名不能为空');
+            return false;
+        }
+        $.post({
+            id: id,
+            username: username,
+            password: password,
+            role: role,
+            areaId: areaId,
+            status: status,
+            success: function (data) {
+                if(data.code == 200){
+                    alert(data.message)
+                    location.reload();
+                    return;
+                }else{
+                    zuiMsg(data.message);
+                }
+            }
+        });
+    }
+
+    function userUpdate(id, username, role, status, areaId) {
+
+        const urlParams = new URLSearchParams(window.location.search);
+        $('#currentPage').val(urlParams.get('page') || 1);
+        $('#currentSort').val(urlParams.get('sort') || 'id');
+        $('#currentKeyword').val(urlParams.get('keyword') || '');
+
+
+        $('#userUpdateModal').modal('toggle','center')
+
+        $('#id').val(id)
+        $('#username').val(username)
+        $('#role').val(role)
+        $('#area').val(areaId)
+        if(status == 1){
+            $('input[name="status"]').eq(0).attr("checked",true);
+        }else{
+            $('input[name="status"]').eq(1).attr("checked",true);
+        }
+
+    }
 </script>
+
+
 
 <style>
     .main-container {

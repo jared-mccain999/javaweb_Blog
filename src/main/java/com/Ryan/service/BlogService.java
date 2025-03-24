@@ -8,9 +8,11 @@ import com.Ryan.dto.PageInfo;
 public interface BlogService{
     Object count();
 
-    public PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword, Integer userId, Integer areaId);
+    PageInfo<Blog> findByPage(Integer page, Integer pageSize, String sort, String keyword, Integer userId, Integer areaId);
 
-    public PageInfo<BlogDto> UserfindByPage(int page,int pageSize,String keyword);
+    PageInfo<BlogDto> UserfindByPage(int page,int pageSize,String keyword);
 
     boolean updateBlog(BlogDto blogdto);
+
+    PageInfo<BlogDto> HotfindByPage(Integer page, int pageSize);
 }

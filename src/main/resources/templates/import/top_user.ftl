@@ -42,8 +42,8 @@
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="nav navbar-nav">
-                    <li><a href="/hot"><i class="icon icon-fire"></i> 热门博客</a></li>
-                    <li><a href="/area"><i class="icon icon-map-marker"></i> 区域博客</a></li>
+                    <li><a href="/user/hot"><i class="icon icon-fire"></i> 热门博客</a></li>
+                    <li><a href="/user/area"><i class="icon icon-map-marker"></i> 区域博客</a></li>
                     <li><a href="#" data-toggle="modal" data-target="#writeModal"><i class="icon icon-edit"></i> 写博客</a></li>
                 </ul>
 

@@ -27,16 +27,21 @@ public class UserController {
 
     // 用户登入
     @GetMapping("/index")
-    public String index(
-            Model model,
-            @RequestParam(defaultValue = "1") Integer page
-    ) {
+    public String index(Model model, @RequestParam(defaultValue = "1") Integer page) {
         // 分页查询逻辑
-        PageInfo<BlogDto> pageInfo = blogService.UserfindByPage(page, 30,null);
+        PageInfo<BlogDto> pageInfo = blogService.UserfindByPage(page, 30, null);
         model.addAttribute("pageInfo", pageInfo);
-
         return "user/index";
     }
 
+
+    // 按照热度排序
+    @GetMapping("/hot")
+    public String hot(Model model, @RequestParam(defaultValue = "1") Integer page) {
+        // 分页查询逻辑
+        PageInfo<BlogDto> pageInfo = blogService.HotfindByPage(page, 30);
+        model.addAttribute("pageInfo", pageInfo);
+        return "user/hot";
+    }
 
 }

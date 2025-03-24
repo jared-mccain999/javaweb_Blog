@@ -20,8 +20,8 @@ public interface BlogMapper {
             "  b.title,",
             "  b.content,",
             "  b.image,",
-            "  a.name AS area_name,",
-            "  u.username AS author_name,",
+            "  a.name AS area,",
+            "  u.username AS author,",
             "  b.likes_count,",
             "  b.favorites_count,",
             "  b.views_count,",
@@ -63,8 +63,8 @@ public interface BlogMapper {
             @Result(property = "title", column = "title"),
             @Result(property = "content", column = "content"),
             @Result(property = "image", column = "image"),
-            @Result(property = "area", column = "area_name"),
-            @Result(property = "author", column = "author_name"),
+            @Result(property = "area", column = "area"),
+            @Result(property = "author", column = "author"),
             @Result(property = "likesCount", column = "likes_count"),
             @Result(property = "favoritesCount", column = "favorites_count"),
             @Result(property = "viewsCount", column = "views_count"),
@@ -103,10 +103,13 @@ public interface BlogMapper {
             "  <if test='areaid != null and areaid != \"\"'>",
             "    AND (a.id LIKE CONCAT('%', #{areaid}, '%'))",
             "  </if>",
+            "  <if test='status != null and status != \"\"'>",
+            "    AND (b.status = #{status})",
+            "  </if>",
             "</where>",
             "</script>"
     })
-    Integer countByKeyword(@Param("keyword") String keyword, @Param("userid") Integer userid, @Param("areaid") Integer areaid);
+    Integer countByKeyword(@Param("keyword") String keyword, @Param("userid") Integer userid, @Param("areaid") Integer areaid,@Param("status") String status);
 
     @Select({
             "<script>",
@@ -115,8 +118,8 @@ public interface BlogMapper {
             "  b.title,",
             "  b.content,",
             "  b.image,",
-            "  a.name AS area_name,",
-            "  u.username AS author_name,",
+            "  a.name AS area,",
+            "  u.username AS author,",
             "  b.likes_count,",
             "  b.favorites_count,",
             "  b.views_count,",
@@ -140,7 +143,6 @@ public interface BlogMapper {
             "  b.likes_count, b.favorites_count, b.views_count, b.created_time",
             "ORDER BY",
             "  b.created_time DESC",
-
             "LIMIT #{offset}, #{pageSize}",
             "</script>"
     })
@@ -149,4 +151,45 @@ public interface BlogMapper {
 // 修改areaid，发布状态status
     @Update("update blog set area_id = #{areaId}, status = #{status} where id = #{id}")
     int updateBlog(BlogDto blogdto);
+
+    // 查询热门博客
+    @Select({
+            "<script>",
+            "SELECT",
+            "  b.id,",
+            "  b.title,",
+            "  b.content,",
+            "  b.image,",
+            "  a.name AS area,",
+            "  u.username AS author,",
+            "  b.likes_count,",
+            "  b.favorites_count,",
+            "  b.views_count,",
+            "  b.created_time,",
+            "  GROUP_CONCAT(DISTINCT t.tag_name) AS tags ",
+            "FROM blog b",
+            "  INNER JOIN user u ON b.author_id = u.id",
+            "  INNER JOIN area a ON b.area_id = a.id",
+            "  LEFT JOIN blog_tag bt ON b.id = bt.blog_id",
+            "  LEFT JOIN tag t ON bt.tag_id = t.id",
+            "<where>",
+            "   AND b.status = 'approved'",
+            "</where>",
+            "GROUP BY b.id, b.title, b.content, b.image, a.name, u.username,",
+            "  b.likes_count, b.favorites_count, b.views_count, b.created_time",
+            "ORDER BY",
+            " b.favorites_count DESC,",
+            "  b.likes_count DESC,",
+            "  b.views_count DESC,",
+            "  b.created_time DESC",
+            "LIMIT #{offset}, #{pageSize}",
+            "</script>"
+    })
+    List<BlogDto> HotfindByPage(int offset, int pageSize);
 }
+
+
+
+
+
+

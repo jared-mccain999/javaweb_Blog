@@ -217,22 +217,126 @@
     </div>
 </div>
 
-<!-- 编辑用户模态框（保持原有功能不变） -->
-<div class="modal fade" id="userUpudateModal">
-    <!-- 原有模态框内容 -->
+<!-- 编辑用户模态框 -->
+<div class="modal fade" id="userUpdateModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title"><i class="icon icon-edit"></i> 修改用户信息</h4>
+            </div>
+            <form action="/admin/users/update" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="currentPage" id="currentPage">
+                    <input type="hidden" name="currentSort" id="currentSort">
+                    <input type="hidden" name="currentKeyword" id="currentKeyword">
+                    <input type="hidden" name="id" id="id">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" class="form-control" disabled="disabled"
+                               name="username" id="username">
+                    </div>
+                    <div class="form-group">
+                        <label>用户密码</label>
+                        <input type="password" class="form-control"
+                               name="password" id="password">
+                    </div>
+                    <div class="form-group">
+                        <label>用户角色</label>
+                        <select class="form-control" name="role" id="role">
+                            <option value="user">普通用户</option>
+                            <option value="area_admin">区域管理员</option>
+                            <option value="sys_admin">系统管理员</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>管理领域</label>
+                        <input type="text" class="form-control"
+                               name="area" id="area" >
+                    </div>
+                    <div class="form-group">
+                        <label for="example">用户状态</label>
+                        <label>
+                            <input type="radio" name = "status" value="1" checked="checked">正常
+                        </label>
+                        <label>
+                            <input type="radio" name = "status" value="0" >冻结
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" onclick="userUpdateAction()">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
+
 <script>
-    // 保持原有JavaScript功能不变
-    function userUpdate(id, username, role, status, areaId) {
-        // 原有实现
-    }
-
     function userUpdateAction() {
-        // 原有实现
-    }
-</script>
 
+        let id = $('#id').val();
+        let username = $('#username').val();
+        let password = $('#password').val();
+        let role = $('#role').val();
+        let areaId = $('#area').val();
+        let status = $('input[name="status"]:checked').val();
+        // 错误操作显示
+        if(!checkNotNull(id)){
+            zuiMsg('程序错误，请刷新');
+            return false;
+        }
+        if(!checkNotNull(username)){
+            zuiMsg('用户名不能为空');
+            return false;
+        }
+        $.post({
+            id: id,
+            username: username,
+            password: password,
+            role: role,
+            areaId: areaId,
+            status: status,
+            success: function (data) {
+                if(data.code == 200){
+                    alert(data.message)
+                    location.reload();
+                    return;
+                }else{
+                    zuiMsg(data.message);
+                }
+            }
+        });
+    }
+
+    function userUpdate(id, username, role, status, areaId) {
+
+        const urlParams = new URLSearchParams(window.location.search);
+        $('#currentPage').val(urlParams.get('page') || 1);
+        $('#currentSort').val(urlParams.get('sort') || 'id');
+        $('#currentKeyword').val(urlParams.get('keyword') || '');
+
+
+        $('#userUpdateModal').modal('toggle','center')
+
+        $('#id').val(id)
+        $('#username').val(username)
+        $('#role').val(role)
+        $('#area').val(areaId)
+        if(status == 1){
+            $('input[name="status"]').eq(0).attr("checked",true);
+        }else{
+            $('input[name="status"]').eq(1).attr("checked",true);
+        }
+
+    }
+
+
+</script>
 <style>
     /* 保持与公告管理一致的样式 */
     .main-container {
