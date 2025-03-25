@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AdminJwtUtils {
+public class JwtUtils {
 
     // 安全密钥
     private static final String SECRET_KEY = "Ryan,Admin==";

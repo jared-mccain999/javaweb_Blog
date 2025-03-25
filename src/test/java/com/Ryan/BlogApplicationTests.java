@@ -18,7 +18,7 @@ class BlogApplicationTests {
 	void contextLoads() {
 		//
 		// password encryption
-		User user = new User(0, "Ryan", "https://avatars.githubusercontent.com/u/10236901?v=4", "123456", "ryan@gmail.com", 1, 0, 1, 0, "sys_admin", null);
+		User user = new User(1, "洪锐", "https://avatars.githubusercontent.com/u/10236901?v=4", "123456", "ryan@gmail.com", 1, 0, 1, 0, "sys_admin", null);
 		User u = userService.findById(0);
 		user.setCreatedTime(u.getCreatedTime());
 		userService.updateById(user);

@@ -1,9 +1,11 @@
 package com.Ryan.service;
 
+import com.Ryan.dto.RegisterDto;
 import com.Ryan.entity.logininfo.Logininfo;
 import com.Ryan.entity.result.Result;
 import com.Ryan.entity.user.User;
 import com.Ryan.dto.PageInfo;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -20,4 +22,10 @@ public interface UserService {
     boolean updateById(User user);
 
     Result<Logininfo> loginSysAdmin(User user);
+
+    Result<Logininfo> loginSysUser(@Valid User user);
+
+    Result<User> register(RegisterDto registerDto);
+
+    Result<Logininfo> Userlogin(RegisterDto registerDto);
 }

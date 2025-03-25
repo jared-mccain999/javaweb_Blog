@@ -1,10 +1,7 @@
 package com.Ryan.mapper;
 
 import com.Ryan.entity.user.User;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -64,4 +61,11 @@ public interface UserMapper {
 
     @Select("select id, username, image, email, role, password, created_time, blog_count, collection_count, status from user where username = #{username}")
     User findByUsername(String user);
+
+    // 根据邮箱查询用户
+    @Select("select id, username, image, email, role, password, created_time, blog_count, collection_count, status from user where email = #{email}")
+    Object findByEmail(String email);
+
+    @Insert("insert into user (username, password, email, role, created_time) values (#{username}, #{password}, #{email}, #{role}, #{createdTime})")
+    void insertuser(User user);
 }

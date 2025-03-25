@@ -44,7 +44,7 @@
                 <ul class="nav navbar-nav">
                     <li><a href="/user/hot"><i class="icon icon-fire"></i> 热门博客</a></li>
                     <li><a href="/user/area"><i class="icon icon-map-marker"></i> 区域博客</a></li>
-                    <li><a href="#" data-toggle="modal" data-target="#writeModal"><i class="icon icon-edit"></i> 写博客</a></li>
+                    <li><a href="/user/editpage"><i class="icon icon-edit"></i> 写博客</a></li>
                 </ul>
 
                 <!-- 右侧导航 -->
@@ -141,14 +141,7 @@
     </div>
 </div>
 
-<!-- 写文章模态框 -->
-<div class="modal fade" id="writeModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <!-- 内容同之前的修改密码模态框，根据需求添加 -->
-        </div>
-    </div>
-</div>
+
 
 <script>
     // 用户状态管理
@@ -160,7 +153,7 @@
         e.preventDefault();
         const formData = $(this).serializeObject();
 
-        $.post('/api/login', formData)
+        $.post('/user/login', formData)
             .done(res => {
                 localStorage.setItem('token', res.token);
                 updateAuthUI(true);
@@ -178,7 +171,7 @@
             return showRegisterError('两次密码输入不一致');
         }
 
-        $.post('/api/register', formData)
+        $.post('/user/register', formData)
             .done(() => {
                 new $.zui.Messager('注册成功，请登录', {type: 'success'}).show();
                 $('#registerModal').modal('hide');
