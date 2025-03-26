@@ -35,7 +35,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">
+                <a class="navbar-brand" href="/user/index">
                     <i class="icon icon-home"></i> 博客天地
                 </a>
             </div>
@@ -55,7 +55,7 @@
                             <i class="icon icon-user"></i> <span id="username">用户</span> <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="/profile"><i class="icon icon-vcard"></i> 个人中心</a></li>
+                            <li><a href="/user/information"><i class="icon icon-vcard"></i> 个人中心</a></li>
                             <li><a href="#" data-toggle="modal" data-target="#changePasswordModal"><i class="icon icon-lock"></i> 修改密码</a></li>
                             <li class="divider"></li>
                             <li><a href="#" id="logout"><i class="icon icon-power-off"></i> 退出</a></li>

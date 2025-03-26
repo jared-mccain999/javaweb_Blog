@@ -124,11 +124,6 @@ public class UserController {
         return "user/hot";
     }
 
-    // 编辑页面
-//    @GetMapping("/edit_page")
-//    public String editpage(Tag[] tags) {
-//        return "/user/editpage";
-//    }
 
     // 上传文件
     @PostMapping("/uploadFile")
@@ -244,4 +239,28 @@ public class UserController {
         return null;
     }
 
+
+    // 个人信息
+    // 根据cookie中的token获取用户信息，包括用户名、头像等，以及发布的文章
+    @GetMapping("/information")
+    public String information(Model model, HttpServletRequest request) throws Exception {
+        // 调用函数
+        String token = getTokenFromRequest(request);
+        if (token != null) {
+            // 传入Service层
+            // 获取用户基本信息
+            User user = userService.getUserByToken(token);
+            // 判断用户是否存在
+            if (user == null) {
+                return "user/index";
+            }
+            model.addAttribute("user", user);
+
+            // 获取用户发布博客信息
+            List<BlogDto> blogs = blogService.findByUserId(user.getId());
+            model.addAttribute("blogs", blogs);
+        }
+
+        return "user/information";
+    }
 }

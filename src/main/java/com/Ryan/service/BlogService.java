@@ -24,4 +24,6 @@ public interface BlogService{
     List<Tag> getAllTags();
 
     Blog createBlog(BlogCreateDto blogDto, String token);
+
+    List<BlogDto> findByUserId(Integer id);
 }

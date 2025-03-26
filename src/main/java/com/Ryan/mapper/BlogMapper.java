@@ -197,6 +197,37 @@ public interface BlogMapper {
             "values(#{title}, #{content}, #{areaId}, #{authorId}, #{image}, now())")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     void createBlog(BlogCreateDto blogDto);
+
+
+    @Select({
+            "<script>",
+            "SELECT",
+            "  b.id,",
+            "  b.title,",
+            "  b.content,",
+            "  b.image,",
+            "  a.name AS area,",
+            "  u.username AS author,",
+            "  b.likes_count,",
+            "  b.favorites_count,",
+            "  b.views_count,",
+            "  b.created_time,",
+            "  GROUP_CONCAT(DISTINCT t.tag_name) AS tags ",
+            "FROM blog b",
+            "  INNER JOIN user u ON b.author_id = u.id",
+            "  INNER JOIN area a ON b.area_id = a.id",
+            "  LEFT JOIN blog_tag bt ON b.id = bt.blog_id",
+            "  LEFT JOIN tag t ON bt.tag_id = t.id",
+            "<where>",
+            "   AND u.id = #{id}",
+            "</where>",
+            "GROUP BY b.id, b.title, b.content, b.image, a.name, u.username,",
+            "  b.likes_count, b.favorites_count, b.views_count, b.created_time",
+            "ORDER BY",
+            "  b.created_time DESC",
+            "</script>"
+    })
+    List<BlogDto> findByUserId(Integer id);
 }
 
 

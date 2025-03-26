@@ -39,6 +39,9 @@ public class JwtUtils {
      * @return 包含所有声明的Claims对象
      */
     public static Claims parseToken(String token) throws Exception {
+        if (token == null || token.isEmpty()) {
+            throw new Exception("令牌不能为空");
+        }
         return Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)

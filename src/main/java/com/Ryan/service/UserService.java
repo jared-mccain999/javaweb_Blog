@@ -28,4 +28,6 @@ public interface UserService {
     Result<User> register(RegisterDto registerDto);
 
     Result<Logininfo> Userlogin(RegisterDto registerDto);
+
+    User getUserByToken(String token) throws Exception;
 }

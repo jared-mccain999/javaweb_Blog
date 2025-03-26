@@ -10,6 +10,7 @@ import com.Ryan.service.UserService;
 import com.Ryan.dto.PageInfo;
 import com.Ryan.util.JwtUtils;
 import com.Ryan.util.PasswordUtils;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -218,4 +219,17 @@ public class UserServiceImpl implements UserService {
                 )
         );
     }
+
+    @Override
+    public User getUserByToken(String token) throws Exception {
+        // 解析token，获取id
+        if (token != null) {
+            Claims claims = JwtUtils.parseToken(token);
+            // 获取clamis中的id
+            Integer userId = Integer.parseInt(claims.get("userId").toString());
+            return userMapper.findById(userId);
+        }
+        return null;
+    }
+
 }

@@ -131,5 +131,12 @@ public class BlogServiceImpl implements BlogService {
         return null;
     }
 
+    @Override
+    public List<BlogDto> findByUserId(Integer id) {
+        // 调用mapper层
+        List<BlogDto> blogs = blogMapper.findByUserId(id);
+        return blogs;
+    }
+
 
 }
