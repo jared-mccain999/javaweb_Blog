@@ -57,5 +57,11 @@ public class AreaServiceImpl implements AreaService {
         return areaMapper.getNameById(id);
     }
 
+    @Override
+    public List<Area> getAllAreas() {
+        // 调用mapper层
+        return areaMapper.getAllAreas();
+    }
+
 
 }

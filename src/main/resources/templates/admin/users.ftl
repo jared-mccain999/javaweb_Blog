@@ -53,7 +53,7 @@
 <#--&lt;#&ndash;                <td>${user.createdTime!}</td>&ndash;&gt;-->
 <#--&lt;#&ndash;                <td>${user.createdTime?string('yyyy-MM-dd HH:mm:ss')}</td>&ndash;&gt;-->
 <#--                <td>-->
-<#--                    <a href="/admin/user/edit/${user.id}" class="btn btn-xs btn-info">查看</a>-->
+<#--                    <a href="/admin/user/edit.ftl/${user.id}" class="btn btn-xs btn-info">查看</a>-->
 <#--                </td>-->
 <#--            </tr>-->
 <#--        </#list>-->

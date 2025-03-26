@@ -1,7 +1,9 @@
 package com.Ryan.mapper;
 
+import com.Ryan.dto.BlogCreateDto;
 import com.Ryan.dto.BlogDto;
 import com.Ryan.entity.blog.Blog;
+import com.Ryan.entity.tag.Tag;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -186,6 +188,15 @@ public interface BlogMapper {
             "</script>"
     })
     List<BlogDto> HotfindByPage(int offset, int pageSize);
+
+    @Select("select * from tag")
+    List<Tag> getAllTags();
+
+    // 插入title，content，areaId，authorId，image；以及createTime，用date（），返回id
+    @Insert("insert into blog(title, content, area_id, author_id, image, created_time) " +
+            "values(#{title}, #{content}, #{areaId}, #{authorId}, #{image}, now())")
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    void createBlog(BlogCreateDto blogDto);
 }
 
 

@@ -75,3 +75,7 @@ logging:
           UserService: DEBUG
 
 
+
+# 图片保存路径
+picture:
+  upload-path: /images/

@@ -1,15 +1,28 @@
 package com.Ryan.service.impl;
 
+import com.Ryan.dto.BlogCreateDto;
 import com.Ryan.dto.BlogDto;
 import com.Ryan.entity.blog.Blog;
+import com.Ryan.entity.blog.BlogTag;
+import com.Ryan.entity.tag.Tag;
 import com.Ryan.mapper.BlogMapper;
 import com.Ryan.mapper.BlogTagMapper;
 import com.Ryan.service.BlogService;
 import com.Ryan.dto.PageInfo;
+import com.Ryan.util.JwtUtils;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -20,6 +33,9 @@ public class BlogServiceImpl implements BlogService {
 
     @Autowired
     public BlogTagMapper blogTagMapper;
+    @Autowired
+    private BlogTag blogTag;
+
 
     @Override
     public Integer count() {
@@ -89,5 +105,31 @@ public class BlogServiceImpl implements BlogService {
         pageInfo.setPages((int) Math.ceil((double) total / pageSize));
         return pageInfo;
     }
+
+    @Override
+    public List<Tag> getAllTags() {
+        // 调用mapper层
+        return blogMapper.getAllTags();
+    }
+
+    @Override
+    public Blog createBlog(BlogCreateDto blogDto, String token) {
+        // 获取clamis
+        try {
+            Claims claims = JwtUtils.parseToken(token);
+            Integer userId = Integer.parseInt(claims.get("userId").toString());
+            blogDto.setAuthorId(userId);
+            blogMapper.createBlog(blogDto);
+            // 获取博客id
+            // 插入tags到blog_tag表
+            for (Integer tagId : blogDto.getTagIds()) {
+                blogTagMapper.insertBlogTag(blogDto.getId(), tagId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 }

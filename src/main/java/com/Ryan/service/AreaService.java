@@ -22,4 +22,6 @@ public interface AreaService {
     Integer getIdByName(String name);
 
     String getNameById(Integer id) ;
+
+    List<Area> getAllAreas();
 }

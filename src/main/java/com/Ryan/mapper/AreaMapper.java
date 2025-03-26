@@ -35,4 +35,7 @@ public interface AreaMapper {
 
     @Select("select name from area where id = #{id}")
     String getNameById(Integer id);
+
+    @Select("select * from area")
+    List<Area> getAllAreas();
 }
