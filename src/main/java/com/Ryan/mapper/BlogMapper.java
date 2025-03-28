@@ -228,6 +228,12 @@ public interface BlogMapper {
             "</script>"
     })
     List<BlogDto> findByUserId(Integer id);
+
+    @Select("select * from blog where area_id = #{areaId} and status = 'approved'")
+    List<Blog> selectByAreaId(Long areaId);
+
+    @Select("select * from blog where status = 'approved'")
+    List<Blog> selectAll();
 }
 
 

@@ -26,4 +26,8 @@ public interface BlogService{
     Blog createBlog(BlogCreateDto blogDto, String token);
 
     List<BlogDto> findByUserId(Integer id);
+
+    PageInfo<Blog> getBlogsByAreaId(Long areaId, int page, int size);
+
+    PageInfo<Blog> getAllBlogs(int page, int size);
 }

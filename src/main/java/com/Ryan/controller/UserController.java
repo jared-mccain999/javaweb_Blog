@@ -90,13 +90,14 @@ public class UserController {
         Result<Logininfo> result = userService.Userlogin(registerDto);
         if (result.getCode() == 200) {
             // 设置HttpOnly Cookie
-            Cookie cookie = new Cookie("Token", result.getData().getToken());
+            Cookie cookie = new Cookie("token", result.getData().getToken());
             cookie.setPath("/");
             cookie.setHttpOnly(true);
             cookie.setMaxAge(12 * 3600); // 12小时
             response.addCookie(cookie);
         }
         if (result.getCode() != 200){
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(result);
         }
@@ -231,7 +232,7 @@ public class UserController {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("Token".equals(cookie.getName())) {
+                if ("token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
@@ -262,5 +263,68 @@ public class UserController {
         }
 
         return "user/information";
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Result<String>> logout(HttpServletRequest request, HttpServletResponse response) {
+        // 1. 清除客户端Cookie
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("token".equals(cookie.getName())) {
+                    cookie.setValue("");
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0); // 立即过期
+                    response.addCookie(cookie);
+                    break;
+                }
+            }
+        }
+
+        // 2. 返回成功结果
+        return ResponseEntity.ok(Result.success("退出成功"));
+    }
+
+    @GetMapping("/area")
+    public String areaPage(
+            @RequestParam(value = "areaId", required = false) Long areaId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size,
+            Model model) {
+
+        // 获取所有区域列表
+        List<Area> areas = areaService.getAllAreas();
+        model.addAttribute("areas", areas);
+
+        // 获取博客列表
+        PageInfo<Blog> pageInfo;
+        if (areaId != null) {
+            pageInfo = blogService.getBlogsByAreaId(areaId, page, size);
+            model.addAttribute("selectedAreaId", areaId);
+        } else {
+            pageInfo = blogService.getAllBlogs(page, size);
+        }
+        model.addAttribute("pageInfo", pageInfo);
+
+        return "user/area";
+    }
+
+    // 校验token
+    @GetMapping("checkToken")
+    public ResponseEntity<Result<String>> checkToken(HttpServletRequest request) {
+        String token = getTokenFromRequest(request);
+        if (token == null) {
+            return ResponseEntity.ok(Result.error(401, "未登录"));
+        }
+
+        try {
+            User user = userService.getUserByToken(token);
+            if (user == null) {
+                return ResponseEntity.ok(Result.error(401, "未登录"));
+            }
+            return ResponseEntity.ok(Result.success("已登录"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

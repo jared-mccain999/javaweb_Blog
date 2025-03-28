@@ -22,6 +22,9 @@
             background-size: cover;
             background-position: center;
         }
+        .loading-btn .icon {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -90,7 +93,9 @@
                     <div class="alert alert-danger hide" id="loginError"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary btn-block">登录</button>
+                    <button type="submit" class="btn btn-primary btn-block loading-btn" id="loginBtn">
+                        <span class="btn-text">登录</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -134,71 +139,158 @@
                     <div class="alert alert-danger hide" id="registerError"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success btn-block">立即注册</button>
+                    <button type="submit" class="btn btn-success btn-block loading-btn" id="registerBtn">
+                        <span class="btn-text">立即注册</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
-
 <script>
     // 用户状态管理
-    const authToken = localStorage.getItem('token');
-    updateAuthUI(!!authToken);
+    function updateAuthUI(isLogin) {
+        // 确保DOM元素已经加载
+        if ($('#authNav').length === 0) {
+            setTimeout(() => updateAuthUI(isLogin), 100);
+            return;
+        }
+
+        $('#authNav .dropdown').toggleClass('hidden', !isLogin);
+        $('#authNav li.visible').toggleClass('hidden', isLogin);
+
+        if (isLogin) {
+            // 获取用户名
+            $.get('/user/information').then(res => {
+                $('#username').text(res.username || '用户');
+            }).catch(() => {
+                $('#username').text('用户');
+            });
+        }
+    }
+
+    // 初始化检查登录状态
+    function checkAuthStatus() {
+        $.ajax({
+            url: '/user/checkToken',
+            method: 'GET',
+            success: function(response) {
+                updateAuthUI(response.code === 200);
+            },
+            error: function() {
+                updateAuthUI(false);
+            }
+        });
+    }
+
+    // 全局AJAX设置
+    $.ajaxSetup({
+        statusCode: {
+            401: handleUnauthorized,
+            403: handleUnauthorized
+        }
+    });
 
     // 登录表单处理
     $('#loginForm').submit(function(e) {
         e.preventDefault();
-        const formData = $(this).serializeObject();
+        const $form = $(this);
+        const $btn = $('#loginBtn');
+        const $btnText = $btn.find('.btn-text');
+
+        $btn.prop('disabled', true);
+        $btnText.html('<i class="icon icon-spinner icon-spin"></i> 登录中...');
+
+        const formData = $form.serializeObject();
 
         $.post('/user/login', formData)
             .done(res => {
-                localStorage.setItem('token', res.token);
-                updateAuthUI(true);
-                $('#loginModal').modal('hide');
+                if (res.code === 200) {
+                    updateAuthUI(true);
+                    $('#loginModal').modal('hide');
+                    new $.zui.Messager('登录成功', {type: 'success'}).show();
+                    $form[0].reset();
+                    $('#loginError').addClass('hide');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showLoginError({responseJSON: res});
+                }
             })
-            .fail(showLoginError);
+            .fail(showLoginError)
+            .always(() => {
+                $btn.prop('disabled', false);
+                $btnText.text('登录');
+            });
     });
 
     // 注册表单处理
     $('#registerForm').submit(function(e) {
         e.preventDefault();
-        const formData = $(this).serializeObject();
+        const $form = $(this);
+        const $btn = $('#registerBtn');
+        const $btnText = $btn.find('.btn-text');
+
+        $btn.prop('disabled', true);
+        $btnText.html('<i class="icon icon-spinner icon-spin"></i> 注册中...');
+
+        const formData = $form.serializeObject();
 
         if(formData.password !== formData.confirmPassword) {
-            return showRegisterError('两次密码输入不一致');
+            showRegisterError('两次密码输入不一致');
+            $btn.prop('disabled', false);
+            $btnText.text('立即注册');
+            return;
         }
 
         $.post('/user/register', formData)
-            .done(() => {
-                new $.zui.Messager('注册成功，请登录', {type: 'success'}).show();
-                $('#registerModal').modal('hide');
+            .done(res => {
+                if (res.code === 200) {
+                    new $.zui.Messager('注册成功，请登录', {type: 'success'}).show();
+                    $('#registerModal').modal('hide');
+                    $form[0].reset();
+                    $('#registerError').addClass('hide');
+                } else {
+                    showRegisterError({responseJSON: res});
+                }
             })
-            .fail(showRegisterError);
+            .fail(showRegisterError)
+            .always(() => {
+                $btn.prop('disabled', false);
+                $btnText.text('立即注册');
+            });
     });
 
     // 退出登录
-    $('#logout').click(() => {
-        localStorage.removeItem('token');
-        updateAuthUI(false);
+    $('#logout').click((e) => {
+        e.preventDefault();
+        $.post('/user/logout')
+            .always(() => {
+                updateAuthUI(false);
+                new $.zui.Messager('已退出登录', {type: 'info'}).show();
+                setTimeout(() => location.reload(), 500);
+            });
     });
 
-    // 更新界面状态
-    function updateAuthUI(isLogin) {
-        $('#authNav .dropdown').toggleClass('hidden', !isLogin);
-        $('#authNav li.visible').toggleClass('hidden', isLogin);
+    // 未授权处理
+    function handleUnauthorized() {
+        updateAuthUI(false);
+        new $.zui.Messager('会话已过期，请重新登录', {type: 'danger'}).show();
     }
 
     // 错误提示函数
     function showLoginError(xhr) {
-        const error = xhr.responseJSON || {};
+        const error = xhr.responseJSON || {message: '登录失败'};
         $('#loginError').text(error.message || '登录失败').removeClass('hide');
     }
 
     function showRegisterError(xhr) {
-        const msg = typeof xhr === 'string' ? xhr : (xhr.responseJSON?.message || '注册失败');
+        let msg = '注册失败';
+        if (typeof xhr === 'string') {
+            msg = xhr;
+        } else if (xhr.responseJSON) {
+            msg = xhr.responseJSON.message || msg;
+        }
         $('#registerError').text(msg).removeClass('hide');
     }
 
@@ -210,4 +302,20 @@
             return obj;
         }, {});
     };
+
+    // 页面加载时检查登录状态
+    $(document).ready(function() {
+        checkAuthStatus();
+
+        $(document).ajaxError(function(event, xhr) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                handleUnauthorized();
+            }
+        });
+    });
+
+    // 添加页面显示时的状态检查
+    $(window).on('pageshow', checkAuthStatus);
 </script>
+</body>
+</html>

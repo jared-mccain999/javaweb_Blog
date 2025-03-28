@@ -20,7 +20,7 @@ public class UserInterceptor implements HandlerInterceptor {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("Token".equals(cookie.getName())) {
+                if ("token".equals(cookie.getName())) {
                     token = cookie.getValue();
                     break;
                 }

@@ -10,6 +10,7 @@ import com.Ryan.mapper.BlogTagMapper;
 import com.Ryan.service.BlogService;
 import com.Ryan.dto.PageInfo;
 import com.Ryan.util.JwtUtils;
+import com.github.pagehelper.PageHelper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,6 +138,24 @@ public class BlogServiceImpl implements BlogService {
         List<BlogDto> blogs = blogMapper.findByUserId(id);
         return blogs;
     }
+    @Override
+    public PageInfo<Blog> getBlogsByAreaId(Long areaId, int page, int size) {
+        PageHelper.startPage(page, size);
+        List<Blog> blogs = blogMapper.selectByAreaId(areaId);
+//        return new PageInfo<>(blogs);
+        PageInfo<Blog> pageInfo = new PageInfo<>();
+        pageInfo.setList(blogs);
+        return pageInfo;
+    }
 
+
+    @Override
+    public PageInfo<Blog> getAllBlogs(int page, int size) {
+        PageHelper.startPage(page, size);
+        List<Blog> blogs = blogMapper.selectAll();
+        PageInfo<Blog> pageInfo = new PageInfo<>();
+        pageInfo.setList(blogs);
+        return pageInfo;
+    }
 
 }
